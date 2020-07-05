@@ -1,1 +1,10 @@
-alert(1)
+import React from './react';
+import ReactDom from './react-dom';
+
+const ele = (
+  <div className='active' title='123'>
+    hello,<span>react</span>
+  </div>
+)
+
+ReactDom.render(ele, document.getElementById('root'))
