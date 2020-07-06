@@ -1,3 +1,4 @@
+import Component from '../react/component';
 const ReactDom = {
   render
 }
@@ -12,6 +13,13 @@ function _render(vnode) {
     const textNode = document.createTextNode(vnode);
     return textNode;
   }
+  if(typeof vnode.tag === 'function') {
+    // 1、创建组件
+    // 2、设置组件props
+    const comp = createComponent(vnode.tag, vnode.attrs);
+    //3、组件渲染的节点对象
+    return renderComponent(comp);
+  }
   const { tag, attrs } = vnode;
   const dom = document.createElement(tag);
   if(attrs) {
@@ -24,6 +32,25 @@ function _render(vnode) {
   vnode.childrens.forEach(child => render(child, dom))
 
   return dom;
+}
+
+function createComponent(comp, props) {
+  let inst;
+  if(comp.prototype && comp.prototype.render) {
+    inst = new comp(props);
+  } else {
+    inst = new Component(props);
+    inst.constructor = comp;
+    inst.render = function() {
+      return this.constructor(props);
+    }
+  }
+  return inst;
+}
+
+function renderComponent(comp) {
+  const renderer = comp.render();
+  return _render(renderer);
 }
 
 function setAttribute(dom, key, value) {

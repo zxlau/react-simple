@@ -7,4 +7,12 @@ const ele = (
   </div>
 )
 
-ReactDom.render(ele, document.getElementById('root'))
+function Home() {
+  return (
+    <div className='active' title='123'>
+    hello,<span>react</span>
+  </div>
+  )
+}
+
+ReactDom.render(<Home title="active" />, document.getElementById('root'))
