@@ -8,7 +8,8 @@ function render(vnode, container) {
 }
 
 function _render(vnode) {
-  if(!vnode) return;
+  if(vnode === null || vnode === undefined || typeof vnode === 'boolean') return;
+  if(typeof vnode === 'number') vnode = String(vnode);
   if(typeof vnode === 'string') {
     const textNode = document.createTextNode(vnode);
     return textNode;
@@ -18,7 +19,15 @@ function _render(vnode) {
     // 2、设置组件props
     const comp = createComponent(vnode.tag, vnode.attrs);
     //3、组件渲染的节点对象
-    return renderComponent(comp);
+
+    if(!comp.base) {
+      if(comp.componentWillMount) comp.componentWillMount();
+    } else if(comp.componentWillReceiveProps) {
+      comp.componentWillReceiveProps();
+    }
+
+    renderComponent(comp);
+    return comp.base;
   }
   const { tag, attrs } = vnode;
   const dom = document.createElement(tag);
@@ -29,7 +38,7 @@ function _render(vnode) {
     })
   }
 
-  vnode.childrens.forEach(child => render(child, dom))
+  vnode.childrens && vnode.childrens.forEach(child => render(child, dom))
 
   return dom;
 }
@@ -48,9 +57,23 @@ function createComponent(comp, props) {
   return inst;
 }
 
-function renderComponent(comp) {
+export function renderComponent(comp) {
+  let base;
   const renderer = comp.render();
-  return _render(renderer);
+  base =  _render(renderer);
+  if(comp.base && comp.componentWillUpdate) {
+    comp.componentWillUpdate();
+  }
+  if(comp.base) {
+    if(comp.componentDidUpdate) comp.componentDidUpdate();
+  } else if(comp.componentDidMount) {
+    comp.componentDidMount();
+  }
+  // 节点替换
+  if(comp.base && comp.base.parentNode) {
+    comp.base.parentNode.replaceChild(base, comp.base);
+  }
+  comp.base = base;
 }
 
 function setAttribute(dom, key, value) {
