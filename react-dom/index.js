@@ -1,10 +1,12 @@
 import Component from '../react/component';
+import { diff } from './diff';
 const ReactDom = {
   render
 }
 
-function render(vnode, container) {
-  return container.appendChild(_render(vnode));
+function render(vnode, container, dom) {
+  // return container.appendChild(_render(vnode));
+  return diff(dom, vnode, container);
 }
 
 function _render(vnode) {
